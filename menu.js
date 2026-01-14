@@ -1,3 +1,4 @@
+@@ -1,293 +1,293 @@
 (() => {
 
 /* ================= CONFIG ================= */
@@ -32,7 +33,7 @@ const structure={
     Settings:["Custom","Config"],
     Custom:["Color","Banner"],
     Color:["Theme Blue","Theme Red","Theme Green","Theme Rainbow"],
-    Banner:["Banner 1","Banner 2","Banner 3"],
+    Banner:["blacked","atu","Banner 3"],
     Config:["Save Config"]
 };
 
@@ -44,9 +45,10 @@ Object.keys(structure).forEach(k=>indexMap[k]=0);
 /* ================= BANNERS ================= */
 
 const banners={
-    "Banner 1":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless",
+    "Banner 1":"https://media.discordapp.net/attachments/1449084968734294016/1449618648615358655/image.png?ex=693f8e12&is=693e3c92&hm=41b29c37c801c71676a462a0ff00719103dfe8868e92b9d0425657450e93d615&=&format=webp&quality=lossless",
+    "Banner 2":"https://images.unsplash.com/photo-1549924231-f129b911e442",
     "Banner 2":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless",
-    "Banner 3":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless"
+    "Banner 3":"https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6"
 };
 let currentBanner="Banner 1";
 
@@ -290,4 +292,3 @@ document.addEventListener("keydown",e=>{
 applyTheme();
 render();
 
-})();
