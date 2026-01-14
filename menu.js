@@ -5,16 +5,15 @@
 const UI = {
     w: 300,
     itemH: 36,
-    maxVisible: 8,
     font: "Inter, system-ui, sans-serif",
     fontSizeItem: "13px",
     fontSizeFooter: "11px",
     fontSizeNotif: "12px",
     themes: {
-        blue:{main:"#646cff",bg:"rgba(16,16,20,.9)"},
-        red:{main:"#ff6464",bg:"rgba(20,16,16,.9)"},
-        green:{main:"#64ff64",bg:"rgba(16,20,16,.9)"},
-        rainbow:{main:"#fff",bg:"rgba(16,16,20,.9)",rgb:true}
+        blue:{main:"#646cff",bg:"rgba(16,16,20,.85)"},
+        red:{main:"#ff6464",bg:"rgba(20,16,16,.85)"},
+        green:{main:"#64ff64",bg:"rgba(16,20,16,.85)"},
+        rainbow:{main:"#fff",bg:"rgba(16,16,20,.85)",rgb:true}
     }
 };
 
@@ -38,15 +37,16 @@ const structure={
 };
 
 let menu="Main";
-let indexMap={}, toggles={};
+let indexMap={};
+let toggles={};
 Object.keys(structure).forEach(k=>indexMap[k]=0);
 
 /* ================= BANNERS ================= */
 
 const banners={
-    "Banner 1":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png",
-    "Banner 2":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png",
-    "Banner 3":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png"
+    "Banner 1":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless",
+    "Banner 2":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless",
+    "Banner 3":"https://media.discordapp.net/attachments/1454224277095186523/1460969368308547739/vanity_logo_green.png?ex=6968d940&is=696787c0&hm=db816f9f3ab65fc5ede0b00e07eec2083e977c2ee156c5f7b8a7a5d914d85346&=&format=webp&quality=lossless"
 };
 let currentBanner="Banner 1";
 
@@ -70,9 +70,8 @@ Object.assign(menuBox.style,{
     left:"10%",
     transform:"translate(-50%,-50%) scale(.9)",
     opacity:0,
-    transition:"all .35s cubic-bezier(.25,.8,.25,1)",
-    overflow:"hidden",
-    borderRadius:"6px"
+    transition:"all .3s ease",
+    overflow:"hidden"
 });
 root.appendChild(menuBox);
 
@@ -88,44 +87,26 @@ Object.assign(banner.style,{
     width:"100%",
     height:"100%",
     objectFit:"cover",
-    opacity:.9
+    opacity:.25
 });
 header.appendChild(banner);
 
 /* ================= LIST ================= */
 
 const listWrap=document.createElement("div");
-Object.assign(listWrap.style,{
-    position:"relative",
-    height:UI.maxVisible * UI.itemH + "px",
-    overflow:"hidden"
-});
+listWrap.style.position="relative";
 menuBox.appendChild(listWrap);
-
-/* selector */
 
 const selector=document.createElement("div");
 Object.assign(selector.style,{
     position:"absolute",
     width:"100%",
     height:UI.itemH+"px",
-    transition:"transform .25s cubic-bezier(.25,.8,.25,1)"
+    background:"#ffffff22",
+    borderLeft:"2px solid #fff",
+    transition:"transform .2s"
 });
 listWrap.appendChild(selector);
-
-/* scrollbar */
-
-const scrollBar=document.createElement("div");
-Object.assign(scrollBar.style,{
-    position:"absolute",
-    right:"4px",
-    top:"0",
-    width:"3px",
-    borderRadius:"10px",
-    transition:"all .25s cubic-bezier(.25,.8,.25,1)",
-    opacity:.85
-});
-listWrap.appendChild(scrollBar);
 
 /* ================= FOOTER ================= */
 
@@ -139,10 +120,34 @@ Object.assign(footer.style,{
     alignItems:"center",
     padding:"0 10px",
     fontSize:UI.fontSizeFooter,
-    borderTop:"1px solid #333"
+    borderTop:"1px solid #444"
 });
 footer.innerHTML=`<span>LAST UPDATE</span><span>BETA</span>`;
 menuBox.appendChild(footer);
+
+/* ================= CONFIG SYSTEM ================= */
+
+function getConfigs(){
+    return JSON.parse(localStorage.getItem("menuConfigs")||"{}");
+}
+function saveConfig(name){
+    const cfg=getConfigs();
+    cfg[name]={
+        toggles,
+        currentTheme,
+        currentBanner
+    };
+    localStorage.setItem("menuConfigs",JSON.stringify(cfg));
+}
+function loadConfig(name){
+    const cfg=getConfigs()[name];
+    if(!cfg)return;
+    toggles=cfg.toggles||{};
+    currentTheme=cfg.currentTheme||"blue";
+    currentBanner=cfg.currentBanner||"Banner 1";
+    banner.src=banners[currentBanner];
+    notify(`Config loaded: ${name}`);
+}
 
 /* ================= RENDER ================= */
 
@@ -150,12 +155,11 @@ function render(){
     listWrap.querySelectorAll(".item").forEach(e=>e.remove());
 
     let items=[...structure[menu]];
-    if(menu==="Config") items=[...items,...Object.keys(getConfigs())];
+    if(menu==="Config"){
+        items=[...items,...Object.keys(getConfigs())];
+    }
 
-    const start=Math.max(0,indexMap[menu]-UI.maxVisible+1);
-    const visible=items.slice(start,start+UI.maxVisible);
-
-    visible.forEach((txt,i)=>{
+    items.forEach((txt,i)=>{
         const it=document.createElement("div");
         it.className="item";
 
@@ -176,27 +180,44 @@ function render(){
             alignItems:"center",
             justifyContent:"space-between",
             color:"#eee",
-            fontSize:UI.fontSizeItem,
-            borderBottom:"1px solid rgba(255,255,255,.04)"
+            fontSize:UI.fontSizeItem
         });
 
         listWrap.appendChild(it);
     });
 
-    selector.style.transform=`translateY(${(indexMap[menu]-start)*UI.itemH}px)`;
+    selector.style.transform=`translateY(${indexMap[menu]*UI.itemH}px)`;
+}
 
-    /* scrollbar logic */
-    const total=items.length;
-    if(total>UI.maxVisible){
-        const ratio=UI.maxVisible/total;
-        const barH=Math.max(30,ratio*UI.maxVisible*UI.itemH);
-        const maxScroll=total-UI.maxVisible;
-        const scrollY=(indexMap[menu]/maxScroll)*(UI.maxVisible*UI.itemH-barH);
+/* ================= NOTIF ================= */
 
-        scrollBar.style.height=barH+"px";
-        scrollBar.style.transform=`translateY(${scrollY}px)`;
-        scrollBar.style.display="block";
-    } else scrollBar.style.display="none";
+const notifWrap=document.createElement("div");
+Object.assign(notifWrap.style,{
+    position:"fixed",
+    bottom:"60px",
+    right:"20px",
+    display:"flex",
+    flexDirection:"column",
+    gap:"8px"
+});
+root.appendChild(notifWrap);
+
+function notify(t){
+    const n=document.createElement("div");
+    Object.assign(n.style,{
+        background:"#111",
+        padding:"8px 12px",
+        borderLeft:"2px solid #fff",
+        color:"#fff",
+        fontSize:UI.fontSizeNotif,
+        opacity:0,
+        transform:"translateX(20px)",
+        transition:"all .25s"
+    });
+    n.textContent=t;
+    notifWrap.appendChild(n);
+    requestAnimationFrame(()=>{n.style.opacity=1;n.style.transform="translateX(0)";});
+    setTimeout(()=>{n.style.opacity=0;setTimeout(()=>n.remove(),250);},1800);
 }
 
 /* ================= THEME ================= */
@@ -204,11 +225,10 @@ function render(){
 function applyTheme(){
     const t=UI.themes[currentTheme];
     const col=t.rgb?`hsl(${rgbHue},100%,60%)`:t.main;
-
     menuBox.style.background=t.bg;
     selector.style.background=col+"22";
     selector.style.borderLeft=`2px solid ${col}`;
-    scrollBar.style.background=col;
+    header.style.borderBottom=`1px solid ${col}55`;
 }
 setInterval(()=>{
     if(UI.themes[currentTheme].rgb){
@@ -224,25 +244,41 @@ document.addEventListener("keydown",e=>{
     if(e.key==="F2"){
         visible=!visible;
         menuBox.style.opacity=visible?1:0;
-        menuBox.style.transform=visible
-            ?"translate(-50%,-50%) scale(1)"
-            :"translate(-50%,-50%) scale(.9)";
+        menuBox.style.transform=visible?"translate(-50%,-50%) scale(1)":"translate(-50%,-50%) scale(.9)";
     }
     if(!visible)return;
 
     let items=[...structure[menu]];
     if(menu==="Config") items=[...items,...Object.keys(getConfigs())];
 
-    if(e.key==="ArrowDown") indexMap[menu]=Math.min(items.length-1,indexMap[menu]+1);
-    if(e.key==="ArrowUp") indexMap[menu]=Math.max(0,indexMap[menu]-1);
+    let idx=indexMap[menu];
+
+    if(e.key==="ArrowDown") indexMap[menu]=Math.min(items.length-1,idx+1);
+    if(e.key==="ArrowUp") indexMap[menu]=Math.max(0,idx-1);
     if(e.key==="Backspace"&&menu!=="Main"){menu="Main";indexMap[menu]=0;}
 
     if(e.key==="Enter"){
-        const val=items[indexMap[menu]];
+        const val=items[idx];
+
         if(structure[val]){menu=val;indexMap[menu]=0;}
-        else if(val.startsWith("Theme")) currentTheme=val.split(" ")[1].toLowerCase();
-        else if(val.startsWith("Banner")){currentBanner=val;banner.src=banners[val];}
-        else toggles[val]=!toggles[val];
+        else if(val==="Save Config"){
+            const name=prompt("Config name?");
+            if(name){saveConfig(name);notify("Config saved");}
+        }
+        else if(menu==="Config"){
+            loadConfig(val);
+        }
+        else if(val.startsWith("Theme")){
+            currentTheme=val.split(" ")[1].toLowerCase();
+        }
+        else if(val.startsWith("Banner")){
+            currentBanner=val;
+            banner.src=banners[val];
+        }
+        else{
+            toggles[val]=!toggles[val];
+            notify(`${val}: ${toggles[val]?"ON":"OFF"}`);
+        }
     }
 
     applyTheme();
